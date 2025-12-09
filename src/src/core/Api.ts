@@ -1,5 +1,5 @@
 import axios, {type AxiosInstance} from "axios";
-import Settings from "@/core/Settings";
+import Settings from "@/core/settings";
 
 
 export interface ApiServiceProps{

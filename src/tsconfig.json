@@ -1,35 +1,46 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    },
-
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-    "target": "ES2023",
-    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    /* Módulos e Target (Configuração Moderna) */
+    "target": "ES2022", // Geralmente ES2020 ou ES2022 são suficientes e modernos.
     "module": "ESNext",
-    "types": ["node"],
-    "skipLibCheck": true,
-
-    /* Bundler mode */
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
 
-    /* React + TS recomendado */
+    /* JSX e Outros */
     "jsx": "react-jsx",
+    "skipLibCheck": true,
+    "resolveJsonModule": true, // Útil para importação de arquivos JSON
+    "allowJs": false, // Permite arquivos JS em um projeto TS
 
-    /* Linting */
+    /* Alias de Caminho (@/) */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+
+    /* Rigidez e Linting (Melhores Práticas) */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedIndexedAccess": true, // Adiciona verificação de acesso a índices
+    "noImplicitReturns": true, // Garante que as funções sempre retornem um valor
+    "noPropertyAccessFromIndexSignature": true, // Se quiser ser mais rigoroso com propriedades
+    "noUncheckedSideEffectImports": true, // Já estava, é bom manter
+    "ignoreDeprecations": "5.0", // Útil para suprimir avisos de sintaxe antiga
+    "forceConsistentCasingInFileNames": true // Garante consistência nos nomes de arquivos
   },
 
-  "include": ["src", "vite.config.ts"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.d.ts",
+    "vite.config.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
 }

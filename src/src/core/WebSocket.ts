@@ -1,5 +1,5 @@
 import ReconnectingWebSocket from 'reconnecting-websocket';
-import Settings from '@/core/Settings';
+import Settings from '@/core/settings';
 
 
 export interface WebSocketServiceProps{
