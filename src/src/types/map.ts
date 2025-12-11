@@ -1,5 +1,5 @@
 import { type PropsWithChildren } from "react";
-import type Location from "@/models/location";
+import type { Location } from "@/models/location";
 
 
 export interface MapContainerProps extends PropsWithChildren{

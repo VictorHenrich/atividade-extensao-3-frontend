@@ -1,11 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    /* Módulos e Target (Configuração Moderna) */
-    "target": "ES2022", // Geralmente ES2020 ou ES2022 são suficientes e modernos.
+    "target": "ESNext",
     "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
@@ -19,9 +21,6 @@
 
     /* Alias de Caminho (@/) */
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    },
 
     /* Rigidez e Linting (Melhores Práticas) */
     "strict": true,

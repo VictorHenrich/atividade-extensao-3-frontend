@@ -1,26 +1,26 @@
-import { PropsWithChildren } from "react";
-import { MapContainer as LeafletMapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import Location from "@/models/location";
+import { MapContainer as LeafletMapContainer, TileLayer } from 'react-leaflet';
 import type { MapContainerProps } from "@/types/map";
 
 
 export default function MapContainer({
     center,
-    zoom = 13,
-    scrollWheelZoom = true,
+    zoom,
+    scrollWheelZoom,
     children
 }: MapContainerProps){
     return (
         <LeafletMapContainer
-            center={center}
-            zoom={zoom}
+            center={!center ? null : [center.latitude, center.longitude]}
+            zoom={zoom || 30}
+            scrollWheelZoom={scrollWheelZoom || true}
             className="leaflet-container"
+            style={{ height: "100%", width: "100%" }}
         >
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            {...children}
+            {children}
         </LeafletMapContainer>
     )
 }
