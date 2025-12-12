@@ -1,11 +1,16 @@
-import { createBrowserRouter, type Router } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import HomeView from "@/views/HomeView";
+import LoginView from "./views/LoginView";
 
-const router: Router = createBrowserRouter([
+const router = createBrowserRouter([
   {
     path: "/",
     element: <HomeView />
   },
+  {
+    path: "/login",
+    element: <LoginView />
+  }
 ]);
 
 export default router;

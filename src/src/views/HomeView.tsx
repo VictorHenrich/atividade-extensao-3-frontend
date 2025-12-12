@@ -1,4 +1,4 @@
-import { memo } from "react";
+import React from "react";
 import MapContainer from "@/components/map/MapContainer";
 import { Center } from "@chakra-ui/react";
 import MapMarker from "@/components/map/MapMarker";
@@ -22,4 +22,4 @@ function HomeView(){
 }
 
 
-export default memo(HomeView);
+export default React.memo(HomeView);
