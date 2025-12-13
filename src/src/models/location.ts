@@ -1,7 +1,4 @@
-
-
-
 export interface Location{
     latitude: string | number;
-    longitude: string | number
+    longitude: string | number;
 }
