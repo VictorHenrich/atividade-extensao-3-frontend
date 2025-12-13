@@ -4,7 +4,7 @@ import LoginView from "./views/LoginView";
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/home",
     element: <HomeView />
   },
   {

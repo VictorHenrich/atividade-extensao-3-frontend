@@ -1,4 +1,4 @@
-import { Input as InputChakra, Field } from "@chakra-ui/react";
+import { Input as ChakraInput, InputGroup, Field } from "@chakra-ui/react";
 import { InputProps } from "@/types/inputs";
 import Text from "../texts/Text";
 
@@ -8,6 +8,9 @@ export default function Input({
     fieldErrorTextProps,
     fieldLabelProps,
     fieldRootProps,
+    startElement,
+    endElement,
+    inputGroupProps,
     ...props
 }: InputProps){
     return (
@@ -26,17 +29,23 @@ export default function Input({
                             : label
                         }
                     </Field.Label> : null}
-            <InputChakra
-                borderRadius={15}
-                backgroundColor="white"
-                color="detail"
-                paddingX={5}
-                paddingY={6}
-                fontSize={15}
-                boxShadow="0 1px 3px rgba(0, 0, 0, 0.12)"
-                fontFamily='"Roboto", sans-serif'
-                {...props}
-            />
+            <InputGroup
+                startElement={startElement}
+                endElement={endElement}
+                {...(inputGroupProps || {})}
+            >
+                <ChakraInput
+                    borderRadius={15}
+                    backgroundColor="white"
+                    color="detail"
+                    paddingX={5}
+                    paddingY={6}
+                    fontSize={15}
+                    boxShadow="0 1px 3px rgba(0, 0, 0, 0.12)"
+                    fontFamily='"Roboto", sans-serif'
+                    {...props}
+                />
+            </InputGroup>
             {
                 error ? 
                     <Field.ErrorText {...(fieldErrorTextProps || {})}>
@@ -50,7 +59,8 @@ export default function Input({
                                 </Text> 
                             : label
                         }
-                    </Field.ErrorText> : null}
+                    </Field.ErrorText> : null
+            }
         </Field.Root>
     )
 }

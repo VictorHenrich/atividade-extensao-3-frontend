@@ -6,9 +6,10 @@ import MarkerDefault from "@/assets/icons/marker_default.png";
 export default function MapMarker({
     position,
     iconURL = MarkerDefault,
-    width = 200,
-    height = 200,
-    children
+    width = 50,
+    height = 50,
+    children,
+    leafletMarkerProps
 }: MapMarkerProps){
     const icon = L.icon({
         iconUrl: iconURL,
@@ -19,6 +20,7 @@ export default function MapMarker({
         <Marker 
             position={[position.latitude, position.longitude]}
             icon={icon}
+            {...(leafletMarkerProps || {})}
         >
             {children}
         </Marker>

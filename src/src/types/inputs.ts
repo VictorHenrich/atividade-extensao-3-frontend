@@ -1,17 +1,21 @@
-import { ElementType } from "react";
+import { ReactNode } from "react";
 import type { 
     InputProps as InputPropsChakra, 
     FieldRootProps ,
     FieldErrorTextProps,
     FieldErrorIconProps,
-    FieldLabelProps
+    FieldLabelProps,
+    InputGroupProps
 } from "@chakra-ui/react";
 
 export interface InputProps extends InputPropsChakra{
-    label?: string | ElementType,
-    error?: string | ElementType,
+    startElement?: ReactNode,
+    endElement?: ReactNode,
+    label?: ReactNode,
+    error?: ReactNode,
     fieldRootProps?: FieldRootProps,
     fieldErrorTextProps?: FieldErrorTextProps,
     fieldErrorIconProps?: FieldErrorIconProps,
-    fieldLabelProps?: FieldLabelProps
+    fieldLabelProps?: FieldLabelProps,
+    inputGroupProps?: InputGroupProps
 }
