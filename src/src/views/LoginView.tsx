@@ -10,8 +10,11 @@ import BackgroundLogin from "@/assets/images/background_login.png"
 import { FaGoogle } from "react-icons/fa";
 import { FaInstagramSquare } from "react-icons/fa";
 import { FaFacebook } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 function LoginView(){
+    const navigate = useNavigate();
+
     return (
         <Stack 
             direction="column"
@@ -68,6 +71,7 @@ function LoginView(){
                     <Button
                         borderRadius={50}
                         fontSize={18}
+                        onClick={()=> navigate("/home")}
                     >
                         Entrar
                     </Button>
@@ -85,9 +89,9 @@ function LoginView(){
                         <FaGoogle/>,
                         <FaInstagramSquare />,
                         <FaFacebook />
-                    ].map(item => {
+                    ].map((item, index) => {
                         return (
-                            <IconButton>{item}</IconButton>
+                            <IconButton key={`icon-login-${index}`}>{item}</IconButton>
                         )
                     })}
                 </Stack>

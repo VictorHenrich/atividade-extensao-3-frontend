@@ -2,7 +2,8 @@ import { type PropsWithChildren } from "react";
 import type { Location } from "@/models/location";
 import type { 
     MapContainerProps as MapContainerLeafletProps,
-    MarkerProps as LeafletMarkerProps
+    TooltipProps as LeafletTooltipProps;
+    MarkerProps as LeafletMarkerProps;
 } from "react-leaflet";
 
 
@@ -15,8 +16,10 @@ export interface MapContainerProps extends PropsWithChildren{
 
 export interface MapMarkerProps extends PropsWithChildren{
     position: Location;
-    iconURL?: string;
+    icon?: any;
     width?: number;
     height?: number;
+    tooltip?: string;
+    tooltipProps?: LeafletTooltipProps;
     leafletMarkerProps?: LeafletMarkerProps
 }

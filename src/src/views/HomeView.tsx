@@ -8,32 +8,81 @@ import Input from "@/components/inputs/Input";
 import Drawer from "@/components/menus/Drawer";
 import Text from "@/components/texts/Text";
 import Link from "@/components/texts/Link";
+import Loading from "@/components/feedbacks/Loading";
 import { TbCurrentLocation } from "react-icons/tb";
-import { FaLongArrowAltRight } from "react-icons/fa";
+import { FaLongArrowAltRight, FaRoute, FaSearch } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
+import UserMarker from "@/assets/icons/default_user_marker.png";
+import StopMarker from "@/assets/icons/default_stop_marker.png";
 import { Route } from "@/models/route";
 import { Location } from "@/models/location";
+import { Vehicle } from "@/models/vehicle";
 import { routes as mockRoutes } from "./mocks/home.mock";
 import GeolocationService from "@/services/geolocation";
+import websocket from "@/core/websocket";
+import Button from "@/components/buttons/Button";
+import { Point } from "@/models/point";
 
+
+type SearchFields = {
+    sourceField: string;
+    destinationField: string
+};
 
 function HomeView(){
     const [userLocation, setUserLocation] = useState<Location | void>();
 
-    const [routes, setRoute] = useState<Route[]>([]);
-
     const [vehicleLocation, setVehicleLocation] = useState<Location | void>();
+
+    const [routeSelected, setRouteSelected] = useState<Route | void>();
+
+    const [vehicleSelected, setVehicleSelected] = useState<Vehicle | void>();
+
+    const [openMenu, setOpenMenu] = useState<boolean>(false);
+
+    const [routes, setRoutes] = useState<Route[]>([]);
+
+    const [searchFields, setSearchFields] = useState<SearchFields>({
+        destinationField: "",
+        sourceField: "Localização Atual"
+    });
 
     useEffect(()=> {
         loadInformations();
     }, []);
+
+    useEffect(()=> {
+        connectOnWebSocket();
+
+    }, [vehicleSelected]);
+
+    const mapCenter: Location | undefined = useMemo(()=> {
+        return vehicleLocation || userLocation || undefined;
+    }, [userLocation, vehicleLocation]);
+
+    function connectOnWebSocket(){
+        if(!vehicleSelected)
+            return
+
+        const socket = websocket.createWebSocketClient();
+
+        socket.on(`vehicle-position:${vehicleSelected.id}`, (data: Location)=> {
+            console.log("Posição do veículo: ", data);
+
+            setVehicleLocation(data);
+        });
+
+        socket.on("teste", (data: any)=> console.debug("DADOS DE TESTE: ", data));
+
+        socket.emit("teste", {vehicleId: vehicleSelected.id});
+    }
 
     async function loadInformations(){
         const location: Location = await GeolocationService.getCurrentLocation();
 
         setUserLocation(location);
 
-        setRoute(mockRoutes);
+        setRoutes(mockRoutes);
     }
 
     function calculateTime(start: Date, finish: Date): (number | string)[]{
@@ -60,6 +109,31 @@ function HomeView(){
             return [distance, "metros"];
     }
 
+    function viewOnMap(route: Route): void{
+        setRouteSelected(route);
+
+        setVehicleSelected(route.vehicle);
+
+        setOpenMenu(false);
+    }
+
+    function getFirstAndLastPoint(route: Route): {firstPoint: Point, lastPoint: Point}{
+        const firstPoint: Point = route.points[0];
+                                    
+        const lastPoint: Point = route.points[route.points.length - 1];
+
+        return {
+            firstPoint, 
+            lastPoint
+        }
+    }
+
+    const routeInserted = useMemo(()=> {
+        if(!routeSelected) return;
+
+        return getFirstAndLastPoint(routeSelected);
+    }, [routeSelected]);
+
     return (
         <Stack 
             width="100vw" 
@@ -74,14 +148,14 @@ function HomeView(){
                     color="white"
                     fontSize={15}
                 >
-                    Rota Inserida: [Ponto de Partida]
+                    Rota Inserida: {routeInserted ? `${routeInserted.firstPoint.description}` : "[Ponto de Partida]"}
                     <Icon
                         display="inline"
                         size="inherit"
                     >
                         <FaLongArrowAltRight />
                     </Icon>
-                    [Destino]
+                    {routeInserted ? `${routeInserted.lastPoint.description}` : "[Destino]"}
                 </Heading>
             </Center>
             <Center
@@ -91,35 +165,6 @@ function HomeView(){
                 overflow="hidden"
                 position="relative"
             >
-                <MapContainer
-                    leafletMapContainerProps={{
-                        style: {
-                            position: "absolute",
-                            inset: 0,
-                            zIndex: 1
-                        }
-                    }}
-                    center={{
-                        latitude: "-28.4126723",
-                        longitude: "-48.9586688"
-                    }}
-                >   
-                    {
-                        userLocation 
-                            ? <MapMarker 
-                                    position={userLocation}
-                                /> 
-                            : null
-                    }
-                    
-                    {
-                        vehicleLocation 
-                            ? <MapMarker 
-                                    position={vehicleLocation}
-                                /> 
-                            : null
-                    }
-                </MapContainer>
                 <Stack
                     padding={5}
                     width="full"
@@ -129,6 +174,9 @@ function HomeView(){
                     pointerEvents="auto"
                 >
                     <Input
+                        onBlur={({ target: { value }})=> {
+                            setSearchFields({...searchFields, sourceField: value });
+                        }}
                         placeholder="Sua localização atual"
                         paddingY={0.3}
                         startElement={
@@ -143,6 +191,9 @@ function HomeView(){
                     <Input
                         placeholder="Para onde você quer ir?"
                         paddingY={0.3}
+                        onBlur={({ target: { value }})=> {
+                            setSearchFields({...searchFields, destinationField: value });
+                        }}
                         startElement={
                             <Icon
                                 size="md"
@@ -152,28 +203,100 @@ function HomeView(){
                             </Icon>
                         }
                     />
+                    <Stack 
+                        justify="end"
+                        direction="row"
+                    >
+                        <Button
+                            width="auto"
+                            backgroundColor="detail"
+                            onClick={()=> setOpenMenu(true)}
+                        >
+                                Localizar Rotas
+                                <Icon
+                                    color="white"
+                                >
+                                    <FaSearch />
+                                </Icon>
+                        </Button>
+                    </Stack>
                 </Stack>
+                {
+                    mapCenter 
+                        ? <MapContainer
+                            leafletMapContainerProps={{
+                                style: {
+                                    position: "absolute",
+                                    inset: 0,
+                                    zIndex: 1
+                                }
+                            }}
+                            zoom={10}
+                            center={mapCenter}
+                        >   
+                            {routeSelected 
+                                ? routeSelected.points.map(point => {
+                                    return (
+                                        <MapMarker
+                                            height={30}
+                                            width={30}
+                                            position={point}
+                                            icon={StopMarker}
+                                            tooltip={`Ponto de Ônibos: ${point.description}`}
+                                        /> 
+                                    );
+                                })
+                            : null
+                        
+                            }
+                            {
+                                userLocation 
+                                    ? <MapMarker 
+                                            position={userLocation}
+                                            icon={UserMarker}
+                                        /> 
+                                    : null
+                            }
+                            
+                            {
+                                vehicleLocation 
+                                    ? <MapMarker 
+                                            position={vehicleLocation}
+                                        /> 
+                                    : null
+                            }
+                        </MapContainer> 
+                        : <Loading 
+                            open={true}
+                            text="Carregando mapa..."
+                            backgroundColor="container"
+                            color="detail"
+                        />
+                }
                 <Drawer 
+                    closeOnEscape={true}
+                    onExitComplete={()=> setOpenMenu(false)}
                     size="xl"
                     placement="bottom"
-                    open={true}
-                    hasBackdrop={false}
+                    open={openMenu}
+                    onOpenChange={(details)=> {
+                        if(!details.open)
+                            setOpenMenu(false);
+                    }}
                     drawerBodyProps={{
                         backgroundColor: "container",
-                        position: "relative",
-                        overflow: "visible"
+                        maxHeight: "50vh"
                     }}
                     body={
                         <Stack
                             direction="column"
                             gap={5}
+                            height="100%"
                             overflowY="auto"
-                            position="relative"
-                            top={-20}
                         >
                             {
-                                routes.map(route => {
-                                    const [fistPoint, lastPoint] = route.points;
+                                routes.map((route, index) => {
+                                    const { firstPoint, lastPoint } = getFirstAndLastPoint(route);
                                     
                                     const [durationToDestination, descriptionToDestination] = calculateTime(route.navigation.startTimeToDestination, route.navigation.finishTimeToDestination)
 
@@ -182,18 +305,18 @@ function HomeView(){
                                     const [distance, descriptionDistance] = calculateDistance(route.navigation.distanceToDestination);
 
                                     return (
-                                        <Card.Root 
-                                            onClick={()=> setVehicleLocation(route.vehicle.location)}
+                                        <Card.Root
                                             borderRadius={20}
                                             boxShadow="md"
                                             border="none"
+                                            key={`route-${index}`}
                                         >
                                             <Card.Header>
                                                 <Heading
                                                     fontSize={20}
                                                     color="detail"
                                                 >
-                                                    {`${fistPoint?.description} > ${lastPoint?.description}`}
+                                                    {`${firstPoint?.description} > ${lastPoint?.description}`}
                                                 </Heading>
                                             </Card.Header>
                                             <Card.Body>
@@ -259,8 +382,16 @@ function HomeView(){
                                                         paddingTop={5}
                                                         alignItems="end"
                                                     >
-                                                        <Link>
+                                                        <Link
+                                                            onClick={()=> viewOnMap(route)}
+                                                        >
                                                             Visualizar Rota no Mapa
+                                                            <Icon
+                                                                fontSize="inherit"
+                                                                color="inherit"
+                                                            >
+                                                                <FaRoute />
+                                                            </Icon>
                                                         </Link>
                                                     </Center>
                                                 </Stack>
